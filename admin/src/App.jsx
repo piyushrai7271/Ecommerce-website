@@ -1,8 +1,10 @@
-import React from 'react'
+
 
 const App = () => {
   return (
-    <div>App</div>
+    <div>
+      <h2>This is admin</h2>
+    </div>
   )
 }
 
