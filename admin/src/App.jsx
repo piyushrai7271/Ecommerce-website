@@ -1,9 +1,11 @@
-
+import NavBar from "./components/Navbar/NavBar"
+import Admin from "./pages/admin/Admin";
 
 const App = () => {
   return (
     <div>
-      <h2>This is admin</h2>
+      <NavBar/>
+      <Admin/>
     </div>
   )
 }
