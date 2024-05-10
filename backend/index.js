@@ -129,7 +129,86 @@ app.get("/allproducts",async(req,resp)=>{ //allproducts in place of all_products
     resp.send(products);
 })
 
+// schema creatin for user model
 
+const Users = mongoose.model("Users",{
+    name:{
+        type:String,
+    },
+    email:{
+        type:String,
+        unique:true
+    },
+    password:{
+        type:String,
+    },
+    cartData:{
+        type:Object,
+    },
+    date:{
+        type:Date,
+        default:Date.now,
+    }
+})
+
+// creating end point for regestring the user
+
+app.post("/signup",async(req,resp)=>{
+
+    let check = await Users.findOne({email:req.body.email});
+    if(check){
+        return resp.status(400).json({success:false,errors:"existing user found with same email address"});
+    }
+
+    let cart = {};
+    for (let i= 0; i < 300; i++) {
+        cart[1]=0;
+        
+    }
+   
+    const user = new Users({
+        name:req.body.username,
+        email:req.body.email,
+        password:req.body.password,
+        cartData:cart
+    })
+    await user.save();
+
+    const data = {
+        user:{
+            id:user.id
+        }
+    }
+
+    const token = jwt.sign(data,"secret_ecom");
+    resp.json({success:true,token});
+
+})
+
+//creating endpoint for user login
+
+app.post("/login",async(req,resp)=>{
+
+    let user = await Users.findOne({email:req.body.email})
+
+    if(user){
+        const passCompare = req.body.password === user.password;
+    if(passCompare){
+        const data = {
+           user:{
+            id:user.id
+           }
+        }
+        const token = jwt.sign(data,"secret_ecom");
+        resp.json({success:true,token});
+    }
+    else{
+        resp.json({success:false,errors:"wrong password"});
+    }
+  }else{
+    resp.json({success:false,errors:"wrong email id"});
+  }
+})
 
 
 
