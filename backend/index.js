@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const { type } = require("os");
+
 
 
 app.use(express.json());
@@ -249,6 +249,7 @@ const fetchUser = async (req,resp,next) =>{
 // creating endpoint for adding products in cart data
 
 app.post("/addtocart",fetchUser,async(req,resp)=>{
+    console.log("Added",req.body.itemId);
     let userData = await Users.findOne({_id:req.user.id});
     userData.cartData[req.body.itemId] += 1 ;
     await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
@@ -256,6 +257,28 @@ app.post("/addtocart",fetchUser,async(req,resp)=>{
     resp.send("Added");
 
 })//if error come so here we can can try _id in place of id
+
+// creating end point to remove the product from cart data
+
+app.post("/removefromcart",fetchUser,async(req,resp)=>{
+    console.log("removed",req.body.itemId);
+    let userData = await Users.findOne({_id:req.user.id});
+    if(userData.cartData[req.body.itemId] > 0)
+        userData.cartData[req.body.itemId] -= 1 ;
+        await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
+
+        resp.send("Removed");
+})
+
+// creating end point to get cart data
+
+app.post("/getcart",fetchUser,async(req,resp)=>{
+     console.log("GetCart");
+     let userData = await Users.findOne({_id:req.user.id})
+     resp.json(userData.cartData);
+})
+
+
 
 app.listen(port || 4500,(err)=>{
     if(!err){
