@@ -210,8 +210,52 @@ app.post("/login",async(req,resp)=>{
   }
 })
 
+//creating endpoint for new collection data
 
+app.get("/newcollections",async(req,resp)=>{
+    let products = await Product.find({});
+    let newcollection = products.slice(1).slice(-8) ;
+    console.log("NewCollection fetched");
+    resp.send(newcollection)
+})
 
+//creating endpoiunt for populare in women category
+
+app.get("/popularinwomen",async(req,resp)=>{
+    let products = await Product.find({category:"women"});
+    let popular_in_women = products.slice(0,4);
+    console.log("popolar in women is fetched");
+    resp.send(popular_in_women);
+});
+
+//creating middleware to fetch user
+
+const fetchUser = async (req,resp,next) =>{
+    const token = req.header("auth-token");
+    if(!token){
+        resp.status(401).send({errors:"pleas authenticate using valid token "})
+    }
+    else{
+        try {
+            const data = jwt.verify(token,"secret_ecom");
+            req.user = data.user;
+            next();
+        } catch (error) {
+            resp.status(401).send({errors:"pleas authenticate using a valid token"})
+        }
+    }
+}
+
+// creating endpoint for adding products in cart data
+
+app.post("/addtocart",fetchUser,async(req,resp)=>{
+    let userData = await Users.findOne({_id:req.user.id});
+    userData.cartData[req.body.itemId] += 1 ;
+    await Users.findOneAndUpdate({_id:req.user.id},{cartData:userData.cartData});
+    
+    resp.send("Added");
+
+})//if error come so here we can can try _id in place of id
 
 app.listen(port || 4500,(err)=>{
     if(!err){
